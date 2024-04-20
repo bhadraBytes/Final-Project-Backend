@@ -13,7 +13,7 @@ const OrderSchema = new Schema({
   //we can add enum types: means limited types like in this we wil only be accepting via cash and card
   paymentMethod:{type:String, required: true},
   status:{type:String, default:"pending"},
-  selectedAddress:{ type: [Schema.Types.Mixed], required: true },
+  selectedAddress:{ type: Schema.Types.Mixed, required: true },
 
 });
 
