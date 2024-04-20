@@ -10,8 +10,6 @@ exports.fetchCategories = async (req, res) => {
 };
 
 
-
-
 exports.createCategory = async (req, res) => {
   // the product will be coming from the api body from the frontend
   const category = new Category(req.body);

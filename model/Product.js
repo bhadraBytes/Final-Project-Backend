@@ -27,6 +27,7 @@ const productSchema = new Schema({
     default: 0,
   },
   title: { type: String, required: true },
+  brand: { type: String, required: true },
   category: { type: String, required: true },
   thumbnail: { type: String, required: true },
   images: { type: [String], required: true },
