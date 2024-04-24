@@ -1,11 +1,10 @@
 const { User } = require("../model/User");
 const crypto = require("crypto");
 const { sanitizeUser } = require("../services/common");
-const jwt = require("jsonwebtoken");
 const SECRET_KEY = "SECRET_KEY";
+const jwt = require("jsonwebtoken");
 
 exports.createUser = async (req, res) => {
-  // the product will be coming from the api body from the frontend
   try {
     const salt = crypto.randomBytes(16);
     crypto.pbkdf2(
@@ -19,6 +18,7 @@ exports.createUser = async (req, res) => {
         const doc = await user.save();
 
         req.login(sanitizeUser(doc), (err) => {
+          // this also calls serializer and adds to session
           if (err) {
             res.status(400).json(err);
           } else {
@@ -29,7 +29,7 @@ exports.createUser = async (req, res) => {
                 httpOnly: true,
               })
               .status(201)
-              .json(token);
+              .json({ id: doc.id, role: doc.role });
           }
         });
       }
@@ -40,16 +40,20 @@ exports.createUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  console.log(req.user.token)
+  const user = req.user;
   res
-    .cookie("jwt", req.user.token, {
+    .cookie("jwt", user.token, {
       expires: new Date(Date.now() + 3600000),
       httpOnly: true,
     })
     .status(201)
-    .json(req.user.token);
+    .json({ id: user.id, role: user.role });
 };
 
-exports.checkUser = async (req, res) => {
-  res.json({ status: "success", user: req.user });
+exports.checkAuth = async (req, res) => {
+  if(req.user){
+    res.json(req.user);
+  } else{
+    res.sendStatus(401);
+  }
 };
