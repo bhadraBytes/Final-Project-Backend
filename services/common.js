@@ -1,4 +1,16 @@
 const passport = require("passport");
+const nodemailer = require("nodemailer");
+
+//Email
+let transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // Use `true` for port 465, `false` for all other ports
+  auth: {
+    user: "bhaikigaming4@gmail.com",
+    pass: "qrvz oegd qekn bvbn",
+  },
+});
 
 exports.isAuth = (req, res, done) => {
   return passport.authenticate("jwt");
@@ -18,3 +30,14 @@ exports.cookieExtractor = function (req) {
 };
 // ...
 // opts.jwtFromRequest = cookieExtractor;
+
+exports.sendMail = async function ({ to, subject, text, html }) {
+  let info = await transporter.sendMail({
+    from: '"Ecommerce" <bhaikigaming4@gmail.com>', // sender address
+    to,
+    subject,
+    text,
+    html,
+  });
+  return info;
+};

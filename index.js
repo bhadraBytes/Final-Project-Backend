@@ -11,7 +11,6 @@ const crypto = require("crypto");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const cookieParser = require("cookie-parser");
-const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 
 const { createProduct } = require("./controller/Product");
@@ -25,6 +24,7 @@ const ordersRouter = require("./routes/Orders");
 const { User } = require("./model/User");
 const { isAuth, sanitizeUser, cookieExtractor } = require("./services/common");
 const path = require("path");
+const { Order } = require("./model/Order");
 
 //Webhooks
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
@@ -33,7 +33,7 @@ const endpointSecret = process.env.ENDPOINT_SECRET;
 server.post(
   "/webhook",
   express.raw({ type: "application/json" }),
-  (request, response) => {
+  async (request, response) => {
     const sig = request.headers["stripe-signature"];
 
     let event;
@@ -49,8 +49,11 @@ server.post(
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntentSucceeded = event.data.object;
-        console.log({ paymentIntentSucceeded });
-        // Then define and call a function to handle the event payment_intent.succeeded
+        const order = await Order.findById(
+          paymentIntentSucceeded.metadata.orderId
+        );
+        order.paymentStatus = "received";
+        await order.save();
         break;
       // ... handle other event types
       default:
@@ -68,20 +71,9 @@ const opts = {};
 opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET_KEY; // TODO: should not be in code;
 
-//Email
-let transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Use `true` for port 465, `false` for all other ports
-  auth: {
-    user: "bhaikigaming4@gmail.com",
-    pass: "qrvz oegd qekn bvbn",
-  },
-});
-
 //middlewares
 
-server.use(express.static(path.resolve(__dirname,"build")));
+server.use(express.static(path.resolve(__dirname, "build")));
 server.use(cookieParser());
 server.use(
   session({
@@ -105,18 +97,6 @@ server.use("/users", isAuth(), usersRouter.router);
 server.use("/auth", authRouter.router);
 server.use("/cart", isAuth(), cartRouter.router);
 server.use("/orders", isAuth(), ordersRouter.router);
-// Mail endpoint
-server.post("/mail", async (req, res) => {
-  const { to } = req.body;
-  let info = await transporter.sendMail({
-    from: '"Ecommerce" <bhaikigaming4@gmail.com>', // sender address
-    to: to, // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
-    html: "<b>Hello world?</b>", // html body
-  });
-  res.json(info);
-});
 
 // Passport Strategies
 passport.use(
@@ -196,7 +176,7 @@ passport.deserializeUser(function (user, cb) {
 const stripe = require("stripe")(process.env.STRIPE_SERVER_KEY);
 
 server.post("/create-payment-intent", async (req, res) => {
-  const { totalAmount } = req.body;
+  const { totalAmount, orderId } = req.body;
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
