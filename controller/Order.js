@@ -1,7 +1,7 @@
 const { Order } = require("../model/Order");
+const { Product } = require("../model/Product");
 const { User } = require("../model/User");
 const { sendMail, invoiceTemplate } = require("../services/common");
-
 
 exports.fetchOrdersByUser = async (req, res) => {
   const { id } = req.user;
@@ -16,10 +16,21 @@ exports.fetchOrdersByUser = async (req, res) => {
 exports.createOrder = async (req, res) => {
   // the product will be coming from the api body from the frontend
   const order = new Order(req.body);
+
+  for (let item of order.items) {
+    let product = await Product.findOne({ _id: item.product.id });
+    product.$inc("stock", -1 * item.quantity);
+    await product.save();
+  }
+
   try {
     const doc = await order.save();
-    const user = await User.findById(order.user)
-    sendMail({to:user.email, html:invoiceTemplate(order), subject:"Order Received"})
+    const user = await User.findById(order.user);
+    sendMail({
+      to: user.email,
+      html: invoiceTemplate(order),
+      subject: "Order Received",
+    });
     res.status(201).json(doc);
   } catch (err) {
     res.status(400).json(err);
@@ -49,17 +60,15 @@ exports.updateOrder = async (req, res) => {
   }
 };
 
-
-
 exports.fetchAllOrders = async (req, res) => {
   // and here we will need all query strings
 
   // filter = {"category":["smartphone", "laptops"]}
   // sort = {_sort:"price", order= "desc"}
   // pagination = {_page:1,_limit= 10}
-  //TODO: try with multiple category in frontend
-  let query = Order.find({deleted:{$ne:true}});
-  let totalOrdersQuery = Order.find({deleted:{$ne:true}});
+
+  let query = Order.find({ deleted: { $ne: true } });
+  let totalOrdersQuery = Order.find({ deleted: { $ne: true } });
 
   if (req.query._sort && req.query._order) {
     query = query.sort({ [req.query._sort]: req.query._order });

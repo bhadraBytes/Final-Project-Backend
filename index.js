@@ -69,7 +69,7 @@ server.post(
 
 const opts = {};
 opts.jwtFromRequest = cookieExtractor;
-opts.secretOrKey = process.env.JWT_SECRET_KEY; // TODO: should not be in code;
+opts.secretOrKey = process.env.JWT_SECRET_KEY; 
 
 //middlewares
 
@@ -127,7 +127,7 @@ passport.use(
             sanitizeUser(user),
             process.env.JWT_SECRET_KEY
           );
-          done(null, { id: user.id, role: user.role, token }); // this lines sends to serializer
+          done(null, { id: user.id, role: user.role, token }); // Sending this to serializer
         }
       );
     } catch (err) {
