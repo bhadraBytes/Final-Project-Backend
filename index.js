@@ -85,9 +85,12 @@ server.use(
 server.use(passport.authenticate("session"));
 server.use(
   cors({
+    origin: "https://bhadrabytes-final.vercel.app", // Allow requests from your frontend domain
+    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
     exposedHeaders: ["X-Total-Count"],
   })
 );
+
 server.use(express.json()); // to parse req.body
 server.use("/products", isAuth(), productsRouter.router);
 // we can also use JWT token for client-only auth
