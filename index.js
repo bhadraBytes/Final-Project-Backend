@@ -86,8 +86,8 @@ server.use(
 server.use(passport.authenticate("session"));
 server.use(
   cors({
-    origin: "https://bhadrabytes-final.vercel.app", // Allow requests from your frontend domain
-    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
+    origin: "*",
+    credentials: true,
     exposedHeaders: ["X-Total-Count"],
   })
 );
