@@ -69,7 +69,7 @@ server.post(
 
 const opts = {};
 opts.jwtFromRequest = cookieExtractor;
-opts.secretOrKey = process.env.JWT_SECRET_KEY; 
+opts.secretOrKey = process.env.JWT_SECRET_KEY;
 
 //middlewares
 
@@ -80,6 +80,7 @@ server.use(
     secret: process.env.SESSION_KEY,
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
+    cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production' },
   })
 );
 server.use(passport.authenticate("session"));
