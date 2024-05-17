@@ -78,9 +78,13 @@ server.use(cookieParser());
 server.use(
   session({
     secret: process.env.SESSION_KEY,
-    resave: false, // don't save session if unmodified
-    saveUninitialized: false, // don't create session until something stored
-    cookie: { httpOnly: true },
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true, // Set to true if using HTTPS
+    },
   })
 );
 server.use(passport.authenticate("session"));
