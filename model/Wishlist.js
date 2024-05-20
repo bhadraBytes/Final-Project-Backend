@@ -18,4 +18,5 @@ wishlistSchema.set("toJSON", {
     delete ret._id;
   },
 });
+
 exports.Wishlist = mongoose.model("Wishlist", wishlistSchema);

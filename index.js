@@ -20,7 +20,10 @@ const brandsRouter = require("./routes/Brands");
 const usersRouter = require("./routes/Users");
 const authRouter = require("./routes/Auth");
 const cartRouter = require("./routes/Cart");
+const wishlistRouter = require("./routes/Wishlist");
 const ordersRouter = require("./routes/Orders");
+const reviewRouter = require("./routes/Review");
+const recommendationRouter = require("./routes/Recommendation");
 const { User } = require("./model/User");
 const { isAuth, sanitizeUser, cookieExtractor } = require("./services/common");
 const path = require("path");
@@ -104,7 +107,10 @@ server.use("/brands", isAuth(), brandsRouter.router);
 server.use("/users", isAuth(), usersRouter.router);
 server.use("/auth", authRouter.router);
 server.use("/cart", isAuth(), cartRouter.router);
+server.use("/wishlist", isAuth(), wishlistRouter.router);
 server.use("/orders", isAuth(), ordersRouter.router);
+server.use("/reviews", isAuth(), reviewRouter.router);
+server.use("/recommendations",isAuth(), recommendationRouter);
 
 // Passport Strategies
 passport.use(
