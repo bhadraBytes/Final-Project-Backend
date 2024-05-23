@@ -77,10 +77,7 @@ opts.secretOrKey = process.env.JWT_SECRET_KEY;
 //middlewares
 
 server.use(express.static(path.resolve(__dirname, "build")));
-// Define a wildcard route handler to serve index.html for any route
-server.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
-});
+
 server.use(cookieParser());
 server.use(
   session({
@@ -115,6 +112,13 @@ server.use("/wishlist", isAuth(), wishlistRouter.router);
 server.use("/orders", isAuth(), ordersRouter.router);
 server.use("/reviews", isAuth(), reviewRouter.router);
 server.use("/recommendations", isAuth(), recommendationRouter);
+
+
+// Define a wildcard route handler to serve index.html for any route
+server.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
 
 // Passport Strategies
 passport.use(
