@@ -12,6 +12,7 @@ exports.fetchUserById = async (req, res) => {
         addresses: user.addresses,
         email: user.email,
         role: user.role,
+        name: user.name,
       });
   } catch (err) {
     res.status(400).json(err);
