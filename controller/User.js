@@ -30,3 +30,12 @@ exports.updateUser = async (req, res) => {
     res.status(400).json(err);
   }
 };
+
+exports.fetchAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+};

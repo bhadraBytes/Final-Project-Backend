@@ -22,6 +22,7 @@ const authRouter = require("./routes/Auth");
 const cartRouter = require("./routes/Cart");
 const wishlistRouter = require("./routes/Wishlist");
 const ordersRouter = require("./routes/Orders");
+const couponsRouter = require("./routes/Coupon");
 const reviewRouter = require("./routes/Review");
 const recommendationRouter = require("./routes/Recommendation");
 const { User } = require("./model/User");
@@ -110,6 +111,7 @@ server.use("/auth", authRouter.router);
 server.use("/cart", isAuth(), cartRouter.router);
 server.use("/wishlist", isAuth(), wishlistRouter.router);
 server.use("/orders", isAuth(), ordersRouter.router);
+server.use("/coupon", isAuth(), couponsRouter.router);
 server.use("/reviews", isAuth(), reviewRouter.router);
 server.use("/recommendations", isAuth(), recommendationRouter);
 

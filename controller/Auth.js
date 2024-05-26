@@ -5,6 +5,12 @@ const jwt = require("jsonwebtoken");
 
 exports.createUser = async (req, res) => {
   try {
+    // Check if the email already exists
+    const existingUser = await User.findOne({ email: req.body.email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     const salt = crypto.randomBytes(16);
     crypto.pbkdf2(
       req.body.password,
@@ -13,11 +19,14 @@ exports.createUser = async (req, res) => {
       32,
       "sha256",
       async function (err, hashedPassword) {
+        if (err) {
+          return res.status(500).json({ message: "Error hashing password" });
+        }
+
         const user = new User({ ...req.body, password: hashedPassword, salt });
         const doc = await user.save();
 
         req.login(sanitizeUser(doc), (err) => {
-          // this also calls serializer and adds to session
           if (err) {
             res.status(400).json(err);
           } else {
@@ -37,7 +46,7 @@ exports.createUser = async (req, res) => {
       }
     );
   } catch (err) {
-    res.status(400).json(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

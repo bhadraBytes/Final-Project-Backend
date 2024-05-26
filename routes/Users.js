@@ -1,9 +1,10 @@
 const express = require("express");
-const { fetchUserById, updateUser } = require("../controller/User");
+const { fetchUserById, updateUser, fetchAllUsers } = require("../controller/User");
 
 const router = express.Router();
-// /products is already added as base path
+
 router.get("/own/", fetchUserById)
-      .patch("/:id", updateUser);
+      .patch("/:id", updateUser)
+      .get("/", fetchAllUsers); // Add a new route for fetching all users
 
 exports.router = router;
