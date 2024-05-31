@@ -32,12 +32,13 @@ exports.createUser = async (req, res) => {
           } else {
             const token = jwt.sign(
               sanitizeUser(doc),
-              process.env.JWT_SECRET_KEY
+              process.env.JWT_SECRET_KEY,
+              { expiresIn: '30d' } // Token expires in 30 days
             );
             res
               .cookie("jwt", token, {
-                expires: new Date(Date.now() + 3600000),
                 httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
               })
               .status(201)
               .json({ id: doc.id, role: doc.role });
@@ -50,12 +51,18 @@ exports.createUser = async (req, res) => {
   }
 };
 
+
 exports.loginUser = async (req, res) => {
   const user = req.user;
+  const token = jwt.sign(
+    sanitizeUser(user),
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: '30d' } // Token expires in 30 days
+  );
   res
-    .cookie("jwt", user.token, {
-      expires: new Date(Date.now() + 3600000),
+    .cookie("jwt", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
     })
     .status(201)
     .json({ id: user.id, role: user.role });
@@ -66,9 +73,11 @@ exports.logout = async (req, res) => {
     .cookie("jwt", null, {
       expires: new Date(Date.now()),
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
     })
     .sendStatus(200);
 };
+
 
 exports.checkAuth = async (req, res) => {
   if (req.user) {
