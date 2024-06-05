@@ -74,6 +74,7 @@ opts.secretOrKey = process.env.JWT_SECRET_KEY;
 
 const allowedOrigins = [
   "https://bhadrabytes-final.vercel.app", // Production domain
+  "https://bhadrabytescollection.vercel.app",
   "http://localhost:3000" // Development domain
 ];
 
