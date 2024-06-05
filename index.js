@@ -30,8 +30,7 @@ const { isAuth, sanitizeUser, cookieExtractor } = require("./services/common");
 const path = require("path");
 const { Order } = require("./model/Order");
 
-//Webhooks
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
+// Webhooks
 const endpointSecret = process.env.ENDPOINT_SECRET;
 
 server.post(
@@ -59,7 +58,6 @@ server.post(
         order.paymentStatus = "received";
         await order.save();
         break;
-      // ... handle other event types
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
@@ -70,15 +68,34 @@ server.post(
 );
 
 // JWT options
-
 const opts = {};
 opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET_KEY;
 
-//middlewares
+const allowedOrigins = [
+  "https://bhadrabytes-final.vercel.app", // Production domain
+  "http://localhost:3000" // Development domain
+];
 
+// CORS Configuration
+server.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
+    exposedHeaders: ["X-Total-Count"],
+  })
+);
+
+// Middlewares
 server.use(express.static(path.resolve(__dirname, "build")));
-
 server.use(cookieParser());
 server.use(
   session({
@@ -93,17 +110,10 @@ server.use(
   })
 );
 server.use(passport.authenticate("session"));
-server.use(
-  cors({
-    origin: "https://bhadrabytes-final.vercel.app", // Allow requests from your frontend domain
-    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
-    exposedHeaders: ["X-Total-Count"],
-  })
-);
-
 server.use(express.json()); // to parse req.body
+
+// Routes
 server.use("/products", isAuth(), productsRouter.router);
-// we can also use JWT token for client-only auth
 server.use("/categories", isAuth(), categoriesRouter.router);
 server.use("/brands", isAuth(), brandsRouter.router);
 server.use("/users", isAuth(), usersRouter.router);
@@ -115,12 +125,10 @@ server.use("/coupon", isAuth(), couponsRouter.router);
 server.use("/reviews", isAuth(), reviewRouter.router);
 server.use("/recommendations", isAuth(), recommendationRouter);
 
-
-// Define a wildcard route handler to serve index.html for any route
+// Serve index.html for any route
 server.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-
 
 // Passport Strategies
 passport.use(
@@ -130,12 +138,10 @@ passport.use(
     password,
     done
   ) {
-    // by default passport uses username
     try {
       const user = await User.findOne({ email: email });
-      console.log(email, password, user);
       if (!user) {
-        return done(null, false, { message: "invalid credentials" }); // for safety
+        return done(null, false, { message: "invalid credentials" });
       }
       crypto.pbkdf2(
         password,
@@ -151,7 +157,7 @@ passport.use(
             sanitizeUser(user),
             process.env.JWT_SECRET_KEY
           );
-          done(null, { id: user.id, role: user.role, token }); // Sending this to serializer
+          done(null, { id: user.id, role: user.role, token });
         }
       );
     } catch (err) {
@@ -163,11 +169,10 @@ passport.use(
 passport.use(
   "jwt",
   new JwtStrategy(opts, async function (jwt_payload, done) {
-    console.log({ jwt_payload });
     try {
       const user = await User.findById(jwt_payload.id);
       if (user) {
-        return done(null, sanitizeUser(user)); // this calls serializer
+        return done(null, sanitizeUser(user));
       } else {
         return done(null, false);
       }
@@ -177,34 +182,26 @@ passport.use(
   })
 );
 
-// this creates session variable req.user on being called from callbacks
+// Serialize and Deserialize User
 passport.serializeUser(function (user, cb) {
-  console.log("serialize", user);
   process.nextTick(function () {
     return cb(null, { id: user.id, role: user.role });
   });
 });
 
-// this changes session variable req.user when called from authorized request
-
 passport.deserializeUser(function (user, cb) {
-  console.log("de-serialize", user);
   process.nextTick(function () {
     return cb(null, user);
   });
 });
 
 // Payment Intent Stripe Integration
-
-// This is your test secret API key.
 const stripe = require("stripe")(process.env.STRIPE_SERVER_KEY);
 
 server.post("/create-payment-intent", async (req, res) => {
   const { totalAmount, orderId } = req.body;
-
-  // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: totalAmount * 100, // Amount should be in the smallest currency unit
+    amount: totalAmount * 100,
     currency: "inr",
     automatic_payment_methods: {
       enabled: true,
@@ -216,6 +213,7 @@ server.post("/create-payment-intent", async (req, res) => {
   });
 });
 
+// Connect to MongoDB and start server
 main().catch((err) => console.log(err));
 
 async function main() {
