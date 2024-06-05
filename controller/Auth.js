@@ -39,6 +39,7 @@ exports.createUser = async (req, res) => {
               .cookie("jwt", token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none', // Set SameSite attribute to None
               })
               .status(201)
               .json({ id: doc.id, role: doc.role });
@@ -63,10 +64,12 @@ exports.loginUser = async (req, res) => {
     .cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none', // Set SameSite attribute to None
     })
     .status(201)
     .json({ id: user.id, role: user.role });
 };
+
 
 exports.logout = async (req, res) => {
   res
