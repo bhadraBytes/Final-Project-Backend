@@ -90,3 +90,18 @@ exports.fetchAllOrders = async (req, res) => {
     res.status(400).json(err);
   }
 };
+
+
+
+exports.fetchOrderById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    res.status(200).json(order);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+};
