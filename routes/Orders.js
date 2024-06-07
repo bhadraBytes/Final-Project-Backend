@@ -16,6 +16,6 @@ router
   .delete("/:id", deleteOrder)
   .patch("/:id", updateOrder)
   .get("/", fetchAllOrders)
-  .get("/orders/:id", fetchOrderById);
+  .get("/:id", fetchOrderById);
 
 exports.router = router;
