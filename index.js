@@ -75,7 +75,7 @@ opts.secretOrKey = process.env.JWT_SECRET_KEY;
 const allowedOrigins = [
   "https://bhadrabytes-final.vercel.app", // Production domain
   "https://bhadrabytescollection.vercel.app",
-  "http://localhost:3000" // Development domain
+  "http://localhost:3000", // Development domain
 ];
 
 // CORS Configuration
@@ -85,7 +85,8 @@ server.use(
       // Allow requests with no origin (like mobile apps, curl requests)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
       }
       return callback(null, true);
@@ -106,11 +107,17 @@ server.use(
     cookie: {
       httpOnly: true,
       sameSite: "none",
-      secure: true, // Set to true if using HTTPS
+      secure: true, // Ensure secure cookies are used in production
+      maxAge: 24 * 60 * 60 * 1000, // 1 day expiration for session cookies
     },
   })
 );
+// Initialize passport and manage sessions
+server.use(passport.initialize());
+server.use(passport.session());
 server.use(passport.authenticate("session"));
+
+
 server.use(express.json()); // to parse req.body
 
 // Routes
