@@ -1,3 +1,4 @@
+process.env.RENDER_DETECTED_NODE_VERSION = process.env.RENDER_DETECTED_NODE_VERSION || "20.12.2";
 require("dotenv").config();
 const express = require("express");
 const server = express();
