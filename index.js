@@ -1,4 +1,5 @@
-process.env.RENDER_DETECTED_NODE_VERSION = process.env.RENDER_DETECTED_NODE_VERSION || "20.12.2";
+process.env.RENDER_DETECTED_NODE_VERSION =
+  process.env.RENDER_DETECTED_NODE_VERSION || "20.12.2";
 require("dotenv").config();
 const express = require("express");
 const server = express();
@@ -76,7 +77,8 @@ opts.secretOrKey = process.env.JWT_SECRET_KEY;
 const allowedOrigins = [
   "https://bhadrabytes-final.vercel.app", // Production domain
   "https://bhadrabytescollection.vercel.app",
-  "http://localhost:3000" // Development domain
+  "http://localhost:3000",
+  "https://final-project-backend-1jqg.onrender.com",
 ];
 
 // CORS Configuration
@@ -86,7 +88,8 @@ server.use(
       // Allow requests with no origin (like mobile apps, curl requests)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
         return callback(new Error(msg), false);
       }
       return callback(null, true);
