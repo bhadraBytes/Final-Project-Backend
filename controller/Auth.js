@@ -33,13 +33,13 @@ exports.createUser = async (req, res) => {
             const token = jwt.sign(
               sanitizeUser(doc),
               process.env.JWT_SECRET_KEY,
-              { expiresIn: '30d' } // Token expires in 30 days
+              { expiresIn: "30d" } // Token expires in 30 days
             );
             res
               .cookie("jwt", token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'none', // Set SameSite attribute to None
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "none", // Set SameSite attribute to None
               })
               .status(201)
               .json({ id: doc.id, role: doc.role });
@@ -52,35 +52,32 @@ exports.createUser = async (req, res) => {
   }
 };
 
-
 exports.loginUser = async (req, res) => {
   const user = req.user;
   const token = jwt.sign(
     sanitizeUser(user),
     process.env.JWT_SECRET_KEY,
-    { expiresIn: '30d' } // Token expires in 30 days
+    { expiresIn: "30d" } // Token expires in 30 days
   );
   res
     .cookie("jwt", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none', // Set SameSite attribute to None
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none", // Set SameSite attribute to None
     })
     .status(201)
     .json({ id: user.id, role: user.role });
 };
-
 
 exports.logout = async (req, res) => {
   res
     .cookie("jwt", null, {
       expires: new Date(Date.now()),
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
     })
     .sendStatus(200);
 };
-
 
 exports.checkAuth = async (req, res) => {
   if (req.user) {

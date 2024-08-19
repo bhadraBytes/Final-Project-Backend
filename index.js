@@ -70,9 +70,10 @@ server.post(
 );
 
 // JWT options
-const opts = {};
-opts.jwtFromRequest = cookieExtractor;
-opts.secretOrKey = process.env.JWT_SECRET_KEY;
+const opts = {
+  jwtFromRequest: cookieExtractor,
+  secretOrKey: process.env.JWT_SECRET_KEY,
+};
 
 const allowedOrigins = [
   "https://bhadrabytes-final.vercel.app", // Production domain
@@ -95,10 +96,9 @@ server.use(
       return callback(null, true);
     },
     credentials: true, // Enable credentials (cookies, authorization headers, etc.)
-    exposedHeaders: ["X-Total-Count"],
+    exposedHeaders: ["set-cookie", "X-Total-Count"], // Ensure 'set-cookie' is exposed
   })
 );
-
 // Middlewares
 server.use(express.static(path.resolve(__dirname, "build")));
 server.use(cookieParser());
@@ -109,7 +109,7 @@ server.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "none",
+      sameSite: "lax",
       secure: true, // Set to true if using HTTPS
     },
   })
